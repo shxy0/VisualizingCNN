@@ -1,5 +1,7 @@
+
 import torch
 import torch.nn as nn
+
 import torchvision.models as models
 
 import sys
@@ -68,6 +70,7 @@ class Vgg16Deconv(nn.Module):
 
     def init_weight(self):
         vgg16_pretrained = models.vgg16(pretrained=True)
+        
         for idx, layer in enumerate(vgg16_pretrained.features):
             if isinstance(layer, nn.Conv2d):
                 self.features[self.conv2deconv_indices[idx]].weight.data = layer.weight.data

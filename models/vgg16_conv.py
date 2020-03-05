@@ -1,5 +1,7 @@
+
 import torch
 import torch.nn as nn
+
 import torchvision.models as models
 import torchvision
 
@@ -77,6 +79,7 @@ class Vgg16Conv(nn.Module):
         self.feature_maps = OrderedDict()
         # switch
         self.pool_locs = OrderedDict()
+        
         # initial weight
         self.init_weights()
 
@@ -85,11 +88,17 @@ class Vgg16Conv(nn.Module):
         initial weights from preptrained model by vgg16
         """
         vgg16_pretrained = models.vgg16(pretrained=True)
+        
+        # print(vgg16_pretrained.conv_layer_indices)
+        # print(vgg16_pretrained.feature_maps)
+        # print(vgg16_pretrained.pool_locs)
+        
         # fine-tune Conv2d
         for idx, layer in enumerate(vgg16_pretrained.features):
             if isinstance(layer, nn.Conv2d):
                 self.features[idx].weight.data = layer.weight.data
                 self.features[idx].bias.data = layer.bias.data
+        
         # fine-tune Linear
         for idx, layer in enumerate(vgg16_pretrained.classifier):
             if isinstance(layer, nn.Linear):

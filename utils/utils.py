@@ -1,3 +1,4 @@
+
 import os
 import requests
 import json
@@ -7,7 +8,6 @@ import torch
 """
 this file is utils lib
 """
-
 
 def decode_predictions(preds, top=5):
     """Decode the prediction of an ImageNet model
@@ -21,7 +21,6 @@ def decode_predictions(preds, top=5):
         One list of turples per sample in batch input.
 
     """
-
 
     class_index_path = 'https://s3.amazonaws.com\
 /deep-learning-models/image-models/imagenet_class_index.json'
@@ -44,10 +43,9 @@ def decode_predictions(preds, top=5):
     results = []
     for pred in preds:
         top_value, top_indices = torch.topk(pred, top)
-        result = [tuple(class_index_dict[str(i.item())]) + (pred[i].item(),) \
-                for i in top_indices]
-        result = [tuple(class_index_dict[str(i.item())]) + (j.item(),) \
-        for (i, j) in zip(top_indices, top_value)]
+        result = [tuple(class_index_dict[str(i.item())]) + (pred[i].item(),) for i in top_indices]
+        # result = tuple(class_index_dict[str(i.item())]) + (pred[i].item(),) for i in top_indices
+        # result = [tuple(class_index_dict[str(i.item())]) + (j.item(),)  for (i, j) in zip(top_indices,top_value)]
         results.append(result)
 
     return results

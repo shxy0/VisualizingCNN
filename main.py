@@ -1,16 +1,23 @@
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+
 from torchvision.transforms import transforms
+
 import numpy as np
 import cv2
+
 from functools import partial
+
 import matplotlib
 matplotlib.use('agg')
+
 import matplotlib.pyplot as plt
 
 from models import Vgg16Conv
 from models import Vgg16Deconv
+
 from utils import decode_predictions
 
 def load_images(img_path):
@@ -99,32 +106,34 @@ def vis_layer(layer, vgg16_conv, vgg16_deconv):
     # cv2.imshow('reconstruction img ' + str(layer), new_img)
     # cv2.waitKey()
     return new_img, int(max_activation)
-    
 
 if __name__ == '__main__':
     
-    img_path = './data/cat.jpg'
+    img_path = './data/dog.jpg'
 
     # forward processing
     img = load_images(img_path)
+
     vgg16_conv = Vgg16Conv()
     vgg16_conv.eval()
     store(vgg16_conv)
+
     conv_output = vgg16_conv(img)
     pool_locs = vgg16_conv.pool_locs
     print('Predicted:', decode_predictions(conv_output, top=3)[0])
-    
 
-    
     # backward processing
     vgg16_deconv = Vgg16Deconv()
     vgg16_deconv.eval()
+
     plt.figure(num=None, figsize=(16, 12), dpi=80)
     plt.subplot(2, 4, 1)
     plt.title('original picture')
+
     img = cv2.imread(img_path)
     img = cv2.resize(img, (224, 224))
     plt.imshow(img)    
+
     for idx, layer in enumerate([14, 17, 19, 21, 24, 26, 28]):
     # for idx, layer in enumerate(vgg16_conv.conv_layer_indices):        
         plt.subplot(2, 4, idx+2)
@@ -135,5 +144,5 @@ if __name__ == '__main__':
         # plt.colorbar()
 
     # plt.show()
-    plt.savefig('result.jpg')
-    print('result picture has save at ./result.jpg')
+    plt.savefig('result-1.jpg')
+    print('result picture has save at ./result-1.jpg')
