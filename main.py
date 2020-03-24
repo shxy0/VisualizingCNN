@@ -1,24 +1,48 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
 
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+
+# In[2]:
+
+
 from torchvision.transforms import transforms
+
+
+# In[3]:
+
 
 import numpy as np
 import cv2
 
+
+# In[4]:
+
+
 from functools import partial
 
-import matplotlib
-matplotlib.use('agg')
 
-import matplotlib.pyplot as plt
+# In[5]:
+
 
 from models import Vgg16Conv
 from models import Vgg16Deconv
 
+
+# In[6]:
+
+
 from utils import decode_predictions
+
+
+# In[7]:
+
 
 def load_images(img_path):
     # imread from img_path
@@ -41,6 +65,10 @@ def load_images(img_path):
     #cv2.waitKey()
     return img
 
+
+# In[8]:
+
+
 def store(model):
     """
     make hook for feature map
@@ -56,10 +84,15 @@ def store(model):
         # _modules returns an OrderedDict
         layer.register_forward_hook(partial(hook, key=idx))
 
+
+# In[9]:
+
+
 def vis_layer(layer, vgg16_conv, vgg16_deconv):
     """
     visualing the layer deconv result
     """
+    print(vgg16_conv.feature_maps[layer].shape)
     num_feat = vgg16_conv.feature_maps[layer].shape[1]
     
     # set other feature map activations to zero
@@ -107,42 +140,127 @@ def vis_layer(layer, vgg16_conv, vgg16_deconv):
     # cv2.waitKey()
     return new_img, int(max_activation)
 
-if __name__ == '__main__':
+def vis_forward(layer, vgg16_conv):
+    """
+    visualing the forward layer feature maps
+    """
     
-    img_path = './data/dog.jpg'
+    return vgg16_conv.feature_maps[layer]
 
-    # forward processing
-    img = load_images(img_path)
+# In[10]:
 
-    vgg16_conv = Vgg16Conv()
-    vgg16_conv.eval()
-    store(vgg16_conv)
 
-    conv_output = vgg16_conv(img)
-    pool_locs = vgg16_conv.pool_locs
-    print('Predicted:', decode_predictions(conv_output, top=3)[0])
+if __name__ == '__main__':
+    pass
+else:
+    exit()
 
-    # backward processing
-    vgg16_deconv = Vgg16Deconv()
-    vgg16_deconv.eval()
 
-    plt.figure(num=None, figsize=(16, 12), dpi=80)
-    plt.subplot(2, 4, 1)
-    plt.title('original picture')
+# In[11]:
 
-    img = cv2.imread(img_path)
-    img = cv2.resize(img, (224, 224))
-    plt.imshow(img)    
 
-    for idx, layer in enumerate([14, 17, 19, 21, 24, 26, 28]):
-    # for idx, layer in enumerate(vgg16_conv.conv_layer_indices):        
-        plt.subplot(2, 4, idx+2)
-        img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
-        plt.title(f'{layer} layer, the max activations is {activation}')
-        # img = img[112:,112:,:]
+# forward processing
+
+vgg16_conv = Vgg16Conv()
+vgg16_conv.eval()
+
+store(vgg16_conv)
+
+
+# In[12]:
+
+
+img_path = './data/dog.jpg'
+img = load_images(img_path)
+
+conv_output = vgg16_conv(img)
+
+pool_locs = vgg16_conv.pool_locs
+# print(pool_locs)
+
+
+# In[13]:
+
+
+print('Predicted:')
+print(decode_predictions(conv_output, top=3)[0])
+
+
+# In[14]:
+
+
+# backward processing
+
+vgg16_deconv = Vgg16Deconv()
+vgg16_deconv.eval()
+
+
+# In[15]:
+
+
+import matplotlib
+# matplotlib.use('agg')
+
+import matplotlib.pyplot as plt
+
+
+# In[16]:
+
+
+plt.figure(num=None, figsize=(16, 9), dpi=60)
+
+img = cv2.imread(img_path)
+
+plt.subplot(1, 2, 1)
+plt.title('original picture 2x')
+plt.imshow(img)
+
+img = cv2.resize(img, (224, 224))
+
+plt.subplot(1, 4, 3)
+plt.title('original picture 1x')
+plt.imshow(img)
+
+plt.show()
+
+
+# In[17]:
+
+
+plt.figure(num=None, figsize=(16, 16), dpi=100)
+
+plt.subplots_adjust(top=0.95, bottom=0.05, left=0.1, right=0.9, 
+                    hspace=0.35, wspace=0.35)
+
+# for idx, layer in enumerate([0,2,-1, 5,7,-1, 10,12,14, 17,19,21, 24,26,28]):
+
+for idx, layer in enumerate([0]):
+    print(layer)
+    if layer == -1 :
+      continue
+
+    # img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
+    imgs = vis_forward(layer, vgg16_conv)[0]
+    print(imgs.shape)
+
+    for i in range(0, len(imgs)):
+        plt.subplot(8, 8, i+1)
+        img = imgs[i].detach() # .numpy()
         plt.imshow(img)
-        # plt.colorbar()
+        
+    # plt.title(f'{layer} layer')
 
-    # plt.show()
-    plt.savefig('result-1.jpg')
-    print('result picture has save at ./result-1.jpg')
+    # img = img[112:,112:,:]
+    # img = cv2.resize(img, (224, 224))
+    # plt.imshow(img) 
+
+plt.savefig('result-1.jpg')
+print('result picture has save at ./result-1.jpg')
+plt.show()
+
+
+# In[ ]:
+
+
+
+

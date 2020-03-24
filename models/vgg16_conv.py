@@ -74,7 +74,8 @@ class Vgg16Conv(nn.Module):
         )
 
         # index of conv
-        self.conv_layer_indices = [0, 2, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26, 28]
+        self.conv_layer_indices = [0,2, 5,7, 10,12,14, 17,19,21, 24,26,28]
+        
         # feature maps
         self.feature_maps = OrderedDict()
         # switch
@@ -113,7 +114,7 @@ class Vgg16Conv(nn.Module):
         for idx, layer in enumerate(self.features):
             if isinstance(layer, nn.MaxPool2d):
                 x, location = layer(x)
-                # self.pool_locs[idx] = location
+                self.pool_locs[idx] = location
             else:
                 x = layer(x)
         
