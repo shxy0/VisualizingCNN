@@ -140,6 +140,10 @@ def vis_layer(layer, vgg16_conv, vgg16_deconv):
     # cv2.waitKey()
     return new_img, int(max_activation)
 
+
+# In[10]:
+
+
 def vis_forward(layer, vgg16_conv):
     """
     visualing the forward layer feature maps
@@ -147,7 +151,8 @@ def vis_forward(layer, vgg16_conv):
     
     return vgg16_conv.feature_maps[layer]
 
-# In[10]:
+
+# In[11]:
 
 
 if __name__ == '__main__':
@@ -156,7 +161,7 @@ else:
     exit()
 
 
-# In[11]:
+# In[12]:
 
 
 # forward processing
@@ -167,7 +172,7 @@ vgg16_conv.eval()
 store(vgg16_conv)
 
 
-# In[12]:
+# In[33]:
 
 
 img_path = './data/dog.jpg'
@@ -179,14 +184,14 @@ pool_locs = vgg16_conv.pool_locs
 # print(pool_locs)
 
 
-# In[13]:
+# In[14]:
 
 
 print('Predicted:')
 print(decode_predictions(conv_output, top=3)[0])
 
 
-# In[14]:
+# In[15]:
 
 
 # backward processing
@@ -195,7 +200,7 @@ vgg16_deconv = Vgg16Deconv()
 vgg16_deconv.eval()
 
 
-# In[15]:
+# In[16]:
 
 
 import matplotlib
@@ -204,59 +209,134 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 
-# In[16]:
+# In[34]:
 
 
 plt.figure(num=None, figsize=(16, 9), dpi=60)
 
-img = cv2.imread(img_path)
+img2 = cv2.imread(img_path)
 
 plt.subplot(1, 2, 1)
 plt.title('original picture 2x')
-plt.imshow(img)
+plt.imshow(img2)
 
-img = cv2.resize(img, (224, 224))
+img3 = cv2.resize(img2, (224, 224))
 
 plt.subplot(1, 4, 3)
 plt.title('original picture 1x')
-plt.imshow(img)
+plt.imshow(img3)
 
 plt.show()
 
 
-# In[17]:
+# In[18]:
 
 
-plt.figure(num=None, figsize=(16, 16), dpi=100)
+import collections
 
-plt.subplots_adjust(top=0.95, bottom=0.05, left=0.1, right=0.9, 
-                    hspace=0.35, wspace=0.35)
+cfg = {}
 
-# for idx, layer in enumerate([0,2,-1, 5,7,-1, 10,12,14, 17,19,21, 24,26,28]):
+cfg[0] = [16, 16,100,  8, 8]
+cfg[1] = cfg[0]
+cfg[2] = [16, 16,100,  8, 8]
+cfg[3] = cfg[2]
+cfg[4] = cfg[2]
 
-for idx, layer in enumerate([0]):
+cfg[5] = [16, 32,100, 16, 8]
+cfg[7] = [16, 32,100, 16, 8]
+
+cfg[10] = [16, 64,100, 32, 8]
+cfg[12] = [16, 64,100, 32, 8]
+cfg[14] = [16, 64,100, 32, 8]
+
+cfg[17] = [16,128,100, 64, 8]
+cfg[19] = [16,128,100, 64, 8]
+cfg[21] = [16,128,100, 64, 8]
+
+cfg[24] = [16,128,100, 64, 8]
+cfg[26] = [16,128,100, 64, 8]
+cfg[28] = [16,128,100, 64, 8]
+
+
+# In[19]:
+
+
+def putImgLine(line):
+    
+    for i, num in enumerate(line):
+
+        print(str(i) + ', ' + str(num))
+
+
+# In[25]:
+
+
+def drawLayer(layer, save=False):
+
     print(layer)
     if layer == -1 :
-      continue
+      return
+
+    plt.figure(num=None, figsize=(cfg[layer][0], cfg[layer][1]), dpi=cfg[layer][2])
 
     # img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
+
     imgs = vis_forward(layer, vgg16_conv)[0]
     print(imgs.shape)
 
+    # putImgLine(imgs[1][0])
+    # putImgLine(imgs[1][1])
+
+    drawImages(cfg[layer][3], cfg[layer][4], imgs, save)
+
+
+# In[31]:
+
+
+def drawImages(rows, cols, imgs, save=False):
+
+    print(type(imgs))
+    
     for i in range(0, len(imgs)):
-        plt.subplot(8, 8, i+1)
-        img = imgs[i].detach() # .numpy()
+    # for i in range(0, 0):
+
+        plt.subplot(rows, cols, i+1)
+        img = imgs[i].detach().numpy()
+        print(type(img))
+        print(img.shape)
+        img = cv2.resize(img, (imgs.shape[1], imgs.shape[2]))
         plt.imshow(img)
-        
+
     # plt.title(f'{layer} layer')
 
-    # img = img[112:,112:,:]
-    # img = cv2.resize(img, (224, 224))
-    # plt.imshow(img) 
+    if save:
+        figname = 'result' + str(layer) + '.jpg'
+        plt.savefig(figname)
+        print('result picture has save at ./' + figname)
 
-plt.savefig('result-1.jpg')
-print('result picture has save at ./result-1.jpg')
-plt.show()
+    plt.show()
+
+
+# In[39]:
+
+
+print(type(img))
+print(img.shape)
+drawImages(1, 3, img[0])
+
+putImgLine(img[0][1][0])
+putImgLine(img[0][1][1])
+
+
+# In[32]:
+
+
+plt.subplots_adjust(top=0.95, bottom=0.05, left=0.1, right=0.9, 
+                    hspace=0.35, wspace=0.35)
+    
+# for idx, layer in enumerate([0,2,-1, 5,7,-1, 10,12,14, 17,19,21, 24,26,28]):
+for layer in [4]:
+    drawLayer(layer)
 
 
 # In[ ]:
