@@ -172,7 +172,7 @@ vgg16_conv.eval()
 store(vgg16_conv)
 
 
-# In[33]:
+# In[13]:
 
 
 img_path = './data/dog.jpg'
@@ -209,7 +209,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 
-# In[34]:
+# In[17]:
 
 
 plt.figure(num=None, figsize=(16, 9), dpi=60)
@@ -268,7 +268,7 @@ def putImgLine(line):
         print(str(i) + ', ' + str(num))
 
 
-# In[25]:
+# In[20]:
 
 
 def drawLayer(layer, save=False):
@@ -290,7 +290,7 @@ def drawLayer(layer, save=False):
     drawImages(cfg[layer][3], cfg[layer][4], imgs, save)
 
 
-# In[31]:
+# In[21]:
 
 
 def drawImages(rows, cols, imgs, save=False):
@@ -304,7 +304,7 @@ def drawImages(rows, cols, imgs, save=False):
         img = imgs[i].detach().numpy()
         print(type(img))
         print(img.shape)
-        img = cv2.resize(img, (imgs.shape[1], imgs.shape[2]))
+        # img = cv2.resize(img, (imgs.shape[1], imgs.shape[2]))
         plt.imshow(img)
 
     # plt.title(f'{layer} layer')
@@ -315,6 +315,24 @@ def drawImages(rows, cols, imgs, save=False):
         print('result picture has save at ./' + figname)
 
     plt.show()
+
+
+# In[35]:
+
+
+print(type(vgg16_conv.features[0]))
+
+print(vgg16_conv.features[0].weight.shape)
+print(vgg16_conv.features[0].bias.shape)
+
+
+# In[41]:
+
+
+for i in range(vgg16_conv.features[0].weight.shape[0]):
+    print(i)
+    print(vgg16_conv.features[0].weight[i].data)
+    print(vgg16_conv.features[0].bias[i].data)
 
 
 # In[39]:
