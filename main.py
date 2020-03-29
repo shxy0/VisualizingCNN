@@ -21,6 +21,9 @@ from torchvision.transforms import transforms
 import numpy as np
 import cv2
 
+# import matplotlib
+import matplotlib.pyplot as plt
+
 
 # In[4]:
 
@@ -85,7 +88,7 @@ def store(model):
         layer.register_forward_hook(partial(hook, key=idx))
 
 
-# In[9]:
+# In[38]:
 
 
 def vis_layer(layer, vgg16_conv, vgg16_deconv):
@@ -106,6 +109,7 @@ def vis_layer(layer, vgg16_conv, vgg16_deconv):
         act_lst.append(activation.item())
 
     act_lst = np.array(act_lst)
+    print(act_lst.size)
     mark = np.argmax(act_lst)
 
     choose_map = new_feat_map[0, mark, :, :]
@@ -127,8 +131,8 @@ def vis_layer(layer, vgg16_conv, vgg16_deconv):
     # make zeros for ther activations
     new_feat_map[0, mark, :, :] = choose_map
     
-    # print(torch.max(new_feat_map[0, mark, :, :]))    
-    print(max_activation)
+    print(torch.max(new_feat_map[0, mark, :, :]))    
+    print('max_activation {}'.format(max_activation))
     
     deconv_output = vgg16_deconv(new_feat_map, layer, mark, vgg16_conv.pool_locs)
 
@@ -136,8 +140,8 @@ def vis_layer(layer, vgg16_conv, vgg16_deconv):
     # normalize
     new_img = (new_img - new_img.min()) / (new_img.max() - new_img.min()) * 255
     new_img = new_img.astype(np.uint8)
-    # cv2.imshow('reconstruction img ' + str(layer), new_img)
-    # cv2.waitKey()
+    
+    print('new_img.shape ' + str(new_img.shape))
     return new_img, int(max_activation)
 
 
@@ -203,33 +207,26 @@ vgg16_deconv.eval()
 # In[16]:
 
 
-import matplotlib
-# matplotlib.use('agg')
-
-import matplotlib.pyplot as plt
-
-
-# In[17]:
-
-
-plt.figure(num=None, figsize=(16, 9), dpi=60)
+plt.figure(num=None, figsize=(8, 4), dpi=60)
 
 img2 = cv2.imread(img_path)
+print(img2.shape)
 
-plt.subplot(1, 2, 1)
-plt.title('original picture 2x')
+plt.subplot(1, 4, 1)
+plt.title('original picture 1x')
 plt.imshow(img2)
 
 img3 = cv2.resize(img2, (224, 224))
+print(img3.shape)
 
-plt.subplot(1, 4, 3)
-plt.title('original picture 1x')
+plt.subplot(1, 2, 2)
+plt.title('original picture 2x')
 plt.imshow(img3)
 
 plt.show()
 
 
-# In[18]:
+# In[17]:
 
 
 import collections
@@ -258,7 +255,7 @@ cfg[26] = [16,128,100, 64, 8]
 cfg[28] = [16,128,100, 64, 8]
 
 
-# In[19]:
+# In[18]:
 
 
 def putImgLine(line):
@@ -268,10 +265,10 @@ def putImgLine(line):
         print(str(i) + ', ' + str(num))
 
 
-# In[20]:
+# In[32]:
 
 
-def drawLayer(layer, save=False):
+def drawLayerForward(layer, save=False):
 
     print(layer)
     if layer == -1 :
@@ -279,31 +276,24 @@ def drawLayer(layer, save=False):
 
     plt.figure(num=None, figsize=(cfg[layer][0], cfg[layer][1]), dpi=cfg[layer][2])
 
-    # img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
-
     imgs = vis_forward(layer, vgg16_conv)[0]
-    print(imgs.shape)
-
-    # putImgLine(imgs[1][0])
-    # putImgLine(imgs[1][1])
 
     drawImages(cfg[layer][3], cfg[layer][4], imgs, save)
 
 
-# In[21]:
+# In[33]:
 
 
 def drawImages(rows, cols, imgs, save=False):
-
-    print(type(imgs))
     
     for i in range(0, len(imgs)):
-    # for i in range(0, 0):
 
         plt.subplot(rows, cols, i+1)
+        
         img = imgs[i].detach().numpy()
-        print(type(img))
-        print(img.shape)
+        # print(type(img))
+        # print(img.shape)
+        
         # img = cv2.resize(img, (imgs.shape[1], imgs.shape[2]))
         plt.imshow(img)
 
@@ -317,7 +307,25 @@ def drawImages(rows, cols, imgs, save=False):
     plt.show()
 
 
-# In[35]:
+# In[40]:
+
+
+def drawLayerBackward(layer, save=False):
+
+    print(layer)
+    if layer == -1 :
+      return
+
+    # plt.figure(num=None, figsize=(cfg[layer][0], cfg[layer][1]), dpi=cfg[layer][2])
+    plt.figure(num=None, figsize=(2, 2), dpi=cfg[layer][2])
+
+    img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
+
+    plt.imshow(img)
+    plt.show()
+
+
+# In[21]:
 
 
 print(type(vgg16_conv.features[0]))
@@ -326,7 +334,7 @@ print(vgg16_conv.features[0].weight.shape)
 print(vgg16_conv.features[0].bias.shape)
 
 
-# In[41]:
+# In[22]:
 
 
 for i in range(vgg16_conv.features[0].weight.shape[0]):
@@ -335,26 +343,32 @@ for i in range(vgg16_conv.features[0].weight.shape[0]):
     print(vgg16_conv.features[0].bias[i].data)
 
 
-# In[39]:
+# In[23]:
 
 
 print(type(img))
 print(img.shape)
 drawImages(1, 3, img[0])
 
-putImgLine(img[0][1][0])
-putImgLine(img[0][1][1])
+# putImgLine(img[0][1][0])
+# putImgLine(img[0][1][1])
 
 
-# In[32]:
+# In[36]:
 
 
 plt.subplots_adjust(top=0.95, bottom=0.05, left=0.1, right=0.9, 
                     hspace=0.35, wspace=0.35)
     
 # for idx, layer in enumerate([0,2,-1, 5,7,-1, 10,12,14, 17,19,21, 24,26,28]):
-for layer in [4]:
-    drawLayer(layer)
+for layer in [2]:
+    drawLayerForward(layer)
+
+
+# In[41]:
+
+
+drawLayerBackward(2)
 
 
 # In[ ]:
