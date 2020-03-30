@@ -88,7 +88,7 @@ def store(model):
         layer.register_forward_hook(partial(hook, key=idx))
 
 
-# In[38]:
+# In[9]:
 
 
 def vis_layer(layer, vgg16_conv, vgg16_deconv):
@@ -240,19 +240,34 @@ cfg[3] = cfg[2]
 cfg[4] = cfg[2]
 
 cfg[5] = [16, 32,100, 16, 8]
+cfg[6] = cfg[5]
 cfg[7] = [16, 32,100, 16, 8]
+cfg[8] = cfg[7]
+cfg[9] = cfg[7]
 
 cfg[10] = [16, 64,100, 32, 8]
+cfg[11] = cfg[10]
 cfg[12] = [16, 64,100, 32, 8]
+cfg[13] = cfg[12]
 cfg[14] = [16, 64,100, 32, 8]
+cfg[15] = cfg[14]
+cfg[16] = cfg[14]
 
 cfg[17] = [16,128,100, 64, 8]
+cfg[18] = cfg[17]
 cfg[19] = [16,128,100, 64, 8]
+cfg[20] = cfg[19]
 cfg[21] = [16,128,100, 64, 8]
+cfg[22] = cfg[21]
+cfg[23] = cfg[21]
 
 cfg[24] = [16,128,100, 64, 8]
+cfg[25] = cfg[24]
 cfg[26] = [16,128,100, 64, 8]
+cfg[27] = cfg[26]
 cfg[28] = [16,128,100, 64, 8]
+cfg[29] = cfg[28]
+cfg[30] = cfg[28]
 
 
 # In[18]:
@@ -265,7 +280,7 @@ def putImgLine(line):
         print(str(i) + ', ' + str(num))
 
 
-# In[32]:
+# In[19]:
 
 
 def drawLayerForward(layer, save=False):
@@ -276,12 +291,15 @@ def drawLayerForward(layer, save=False):
 
     plt.figure(num=None, figsize=(cfg[layer][0], cfg[layer][1]), dpi=cfg[layer][2])
 
+    plt.subplots_adjust(top=0.99, bottom=0.01, left=0.05, right=0.95, 
+                        hspace=0.35, wspace=0.35)
+
     imgs = vis_forward(layer, vgg16_conv)[0]
 
     drawImages(cfg[layer][3], cfg[layer][4], imgs, save)
 
 
-# In[33]:
+# In[20]:
 
 
 def drawImages(rows, cols, imgs, save=False):
@@ -304,10 +322,8 @@ def drawImages(rows, cols, imgs, save=False):
         plt.savefig(figname)
         print('result picture has save at ./' + figname)
 
-    plt.show()
 
-
-# In[40]:
+# In[21]:
 
 
 def drawLayerBackward(layer, save=False):
@@ -325,7 +341,7 @@ def drawLayerBackward(layer, save=False):
     plt.show()
 
 
-# In[21]:
+# In[22]:
 
 
 print(type(vgg16_conv.features[0]))
@@ -334,7 +350,7 @@ print(vgg16_conv.features[0].weight.shape)
 print(vgg16_conv.features[0].bias.shape)
 
 
-# In[22]:
+# In[23]:
 
 
 for i in range(vgg16_conv.features[0].weight.shape[0]):
@@ -343,7 +359,7 @@ for i in range(vgg16_conv.features[0].weight.shape[0]):
     print(vgg16_conv.features[0].bias[i].data)
 
 
-# In[23]:
+# In[24]:
 
 
 print(type(img))
@@ -354,25 +370,19 @@ drawImages(1, 3, img[0])
 # putImgLine(img[0][1][1])
 
 
-# In[36]:
+# In[25]:
 
 
-plt.subplots_adjust(top=0.95, bottom=0.05, left=0.1, right=0.9, 
+plt.subplots_adjust(top=0.99, bottom=0.01, left=0.05, right=0.95, 
                     hspace=0.35, wspace=0.35)
     
-# for idx, layer in enumerate([0,2,-1, 5,7,-1, 10,12,14, 17,19,21, 24,26,28]):
-for layer in [2]:
-    drawLayerForward(layer)
+for idx, layer in enumerate([0,1,2,3,4,  5,6,7,8,9,  10,11,12,13,14,15,16,  17,18,19,20,21,22,23,  24,25,26,27,28,29,30]):
+# for layer in [30]:
+    drawLayerForward(layer, save=True)
 
 
-# In[41]:
+# In[26]:
 
 
 drawLayerBackward(2)
-
-
-# In[ ]:
-
-
-
 
