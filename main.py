@@ -283,23 +283,30 @@ def putImgLine(line):
 # In[19]:
 
 
-def drawLayerForward(layer, save=False):
-
-    print(layer)
-    if layer == -1 :
-      return
+def prepareFig(layer):
 
     plt.figure(num=None, figsize=(cfg[layer][0], cfg[layer][1]), dpi=cfg[layer][2])
 
     plt.subplots_adjust(top=0.99, bottom=0.01, left=0.05, right=0.95, 
                         hspace=0.35, wspace=0.35)
 
+
+# In[20]:
+
+
+def drawLayerForward(layer, save=False):
+
+    print(layer)
+    if layer == -1 :
+      return
+
+    prepareFig(layer)
     imgs = vis_forward(layer, vgg16_conv)[0]
 
     drawImages(cfg[layer][3], cfg[layer][4], imgs, save)
 
 
-# In[20]:
+# In[21]:
 
 
 def drawImages(rows, cols, imgs, save=False):
@@ -323,7 +330,35 @@ def drawImages(rows, cols, imgs, save=False):
         print('result picture has save at ./' + figname)
 
 
-# In[21]:
+# In[22]:
+
+
+def vis_backward(layer, vgg16_conv, vgg16_deconv):
+
+    print(vgg16_conv.feature_maps[layer].shape)
+    num_feat = vgg16_conv.feature_maps[layer].shape[1]
+    
+    # set other feature map activations to zero
+    new_feat_map = vgg16_conv.feature_maps[layer].clone()
+    print('new_feat_map.shape ' + str(new_feat_map.shape))
+    
+    deconv_output = vgg16_deconv(new_feat_map, layer, -1, vgg16_conv.pool_locs)
+    print('deconv_output.shape ' + str(deconv_output.shape))
+    '''
+    new_img = deconv_output.data.numpy()[0].transpose(1, 2, 0)  # (H, W, C)
+    print('new_img.shape ' + str(new_img.shape))
+    
+    # normalize
+    new_img = (new_img - new_img.min()) / (new_img.max() - new_img.min()) * 255
+    new_img = new_img.astype(np.uint8)
+    
+    print('new_img.shape ' + str(new_img.shape))
+    return new_img
+    '''
+    return deconv_output # [0].detach().numpy()
+
+
+# In[23]:
 
 
 def drawLayerBackward(layer, save=False):
@@ -332,16 +367,15 @@ def drawLayerBackward(layer, save=False):
     if layer == -1 :
       return
 
-    # plt.figure(num=None, figsize=(cfg[layer][0], cfg[layer][1]), dpi=cfg[layer][2])
-    plt.figure(num=None, figsize=(2, 2), dpi=cfg[layer][2])
+    prepareFig(layer)
 
-    img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
+    # img, activation = vis_layer(layer, vgg16_conv, vgg16_deconv)
+    imgs = vis_backward(layer, vgg16_conv, vgg16_deconv)[0]
 
-    plt.imshow(img)
-    plt.show()
+    drawImages(cfg[layer][3], cfg[layer][4], imgs, save)
 
 
-# In[22]:
+# In[24]:
 
 
 print(type(vgg16_conv.features[0]))
@@ -350,16 +384,18 @@ print(vgg16_conv.features[0].weight.shape)
 print(vgg16_conv.features[0].bias.shape)
 
 
-# In[23]:
+# In[25]:
 
 
+'''
 for i in range(vgg16_conv.features[0].weight.shape[0]):
     print(i)
     print(vgg16_conv.features[0].weight[i].data)
     print(vgg16_conv.features[0].bias[i].data)
+'''
 
 
-# In[24]:
+# In[26]:
 
 
 print(type(img))
@@ -370,19 +406,25 @@ drawImages(1, 3, img[0])
 # putImgLine(img[0][1][1])
 
 
-# In[25]:
+# In[27]:
 
 
 plt.subplots_adjust(top=0.99, bottom=0.01, left=0.05, right=0.95, 
                     hspace=0.35, wspace=0.35)
     
-for idx, layer in enumerate([0,1,2,3,4,  5,6,7,8,9,  10,11,12,13,14,15,16,  17,18,19,20,21,22,23,  24,25,26,27,28,29,30]):
-# for layer in [30]:
-    drawLayerForward(layer, save=True)
+# for idx, layer in enumerate([0,1,2,3,4,  5,6,7,8,9,  10,11,12,13,14,15,16,  17,18,19,20,21,22,23,  24,25,26,27,28,29,30]):
+for layer in [0]:
+    drawLayerForward(layer) # , save=True)
 
 
-# In[26]:
+# In[28]:
 
 
-drawLayerBackward(2)
+drawLayerBackward(0)
+
+
+# In[ ]:
+
+
+
 

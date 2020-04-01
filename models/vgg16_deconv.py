@@ -78,15 +78,22 @@ class Vgg16Deconv(nn.Module):
                 # = layer.bias.data
         
     def forward(self, x, layer, activation_idx, pool_locs):
+    
+        print('x.shape ' + str(x.shape))
+        
         if layer in self.conv2deconv_indices:
             start_idx = self.conv2deconv_indices[layer]
+            print('start_idx ' + str(start_idx))
         else:
             raise ValueError('layer is not a conv feature map')
 
         for idx in range(start_idx, len(self.features)):
             if isinstance(self.features[idx], nn.MaxUnpool2d):
                 x = self.features[idx]\
-                (x, pool_locs[self.unpool2pool_indices[idx]])
+                      (x, pool_locs[self.unpool2pool_indices[idx]])
             else:
                 x = self.features[idx](x)
+
+            print('x.shape ' + str(x.shape))
+
         return x
