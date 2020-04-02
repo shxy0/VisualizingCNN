@@ -77,23 +77,30 @@ class Vgg16Deconv(nn.Module):
                 #self.features[self.conv2deconv_indices[idx]].bias.data\
                 # = layer.bias.data
         
-    def forward(self, x, layer, activation_idx, pool_locs):
+    def forward(self, x, layer, layer0, activation_idx, pool_locs):
     
-        print('x.shape ' + str(x.shape))
+        print('forward x.shape ' + str(x.shape))
         
-        if layer in self.conv2deconv_indices:
-            start_idx = self.conv2deconv_indices[layer]
-            print('start_idx ' + str(start_idx))
-        else:
-            raise ValueError('layer is not a conv feature map')
+        # if layer in self.conv2deconv_indices:
+            # start_idx = self.conv2deconv_indices[layer]
+            # print('start_idx ' + str(start_idx))
+        # else:
+            # raise ValueError('layer is not a conv feature map')
 
-        for idx in range(start_idx, len(self.features)):
+        if (layer < 0 or layer >= len(self.features)):
+            print('layer ' + str(layer))
+            return
+
+        start_idx = len(self.features) - 1 - layer
+        stop_idx1 = len(self.features) - layer0
+        
+        for idx in range(start_idx, stop_idx1):
             if isinstance(self.features[idx], nn.MaxUnpool2d):
                 x = self.features[idx]\
                       (x, pool_locs[self.unpool2pool_indices[idx]])
             else:
                 x = self.features[idx](x)
 
-            print('x.shape ' + str(x.shape))
+            print('idx {} x.shape {}'.format(idx, x.shape))
 
         return x
